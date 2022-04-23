@@ -19,14 +19,6 @@
     width: 100px;
 }
 
-.add{
-    display: inline-block;
-    border: solid 3px red;
-    height: 100px;
-    width: 100px;
-    margin: 10px;
-}
-
 .hovered {
     background: #f4f4f4;
     border-style: dashed;

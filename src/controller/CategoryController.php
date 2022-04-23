@@ -14,10 +14,6 @@ class CategoryController
     private Database $database;
     private View $view;
 
-    public function getChildren (int $id):array {
-        return $this->database->downloadChildrenTree($id);
-    }
-
     public function __construct(array $configuration ){
         if(empty($configuration['db'])) throw new ConfigurationException("Configuration error");
 
@@ -30,8 +26,9 @@ class CategoryController
             if($pages['action']=="ajax") $this->ajax();
             if($pages['action']=="add") $this->add();
             if($pages['action']=="remove") $this->remove();
+            if($pages['action']=="edit") $this->edit();
         }
-        else$this->view->render($pages, ["list" =>$this->ViewTree()]);
+        else $this->view->render($pages, ["list" =>$this->ViewTree()]);
     }
 
     public function ViewTree():array {
@@ -54,6 +51,15 @@ class CategoryController
     public function remove(): void{
         if(isset($_POST['id'])){
             $this->database->removeElement($_POST['id']);
+        }
+    }
+
+    public function edit(): void{
+        if(isset($_POST['id'])){
+            $element = $this->database->getElement($_POST['id']);
+            $p = self::DEFAULT_ACTION;
+            array_push($p, "form");
+            $this->view->render($p, ["list" =>$this->ViewTree(), "element" => $element]);
         }
     }
 }

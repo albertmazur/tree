@@ -6,8 +6,13 @@ for (let liElement of li) {
 }
 
 let removeButton = document.querySelector(".remove");
+if(removeButton!=null) removeButton.addEventListener("click", remove, false)
 
-removeButton.addEventListener("click", remove, false)
+let editButton = document.querySelector(".edit");
+if(editButton!=null) editButton.addEventListener("click", edit, false)
+
+let addButton = document.querySelector(".addFirst");
+if(addButton!=null) addButton.addEventListener("click", addDatabase, false)
 
 function viewList(e){
     if(this.lastChild.tagName!="UL" || this.lastChild==undefined){
@@ -18,7 +23,6 @@ function viewList(e){
         xhr.onload = () => {
             if(xhr.status == 200){
                 let reslut = JSON.parse(xhr.response);
-
                 if(reslut.length>0){
                     // Tworzenie listy
                     let ul = document.createElement("ul");
@@ -32,9 +36,9 @@ function viewList(e){
                         empty.classList.add("empty");
                         empty.innerText = e.nazwa;
 
-                        let remove = newElemRemove()
                         li.append(empty);
-                        li.append(remove);
+                        li.append(newElemRemove());
+                        li.append(createEditButton())
                         ul.append(li);
                     }
                     //Możliwośc dodawania do listy
@@ -63,6 +67,7 @@ function createAddButton(){
     let li = document.createElement("li");
     li.addEventListener('click', viewList, false)
     let button = document.createElement("button");
+    button.classList.add("add")
     button.innerText="+"
     button.addEventListener("click", addDatabase, false)
     li.append(button);
@@ -86,11 +91,10 @@ function newElemRemove(){
 
 //Dodwanie do bazdy
 function addDatabase(e){
+    this.after(createEditButton());
     this.after(newElemRemove())
     let div = newlist()
     this.after(div)
-
-    let button = createAddButton();
 
     let id = this.parentElement.parentElement.dataset.id_rodzic
     let id_prev
@@ -98,9 +102,11 @@ function addDatabase(e){
         id_prev = this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-2].firstElementChild.dataset.id
     }
     else id_prev = null
-    this.parentElement.parentElement.append(button)
+    if(this.className!="addFirst"){
+        let button = createAddButton();
+        this.parentElement.parentElement.append(button)
+    }
     this.remove();
-
 
     xhr.open('POST', 'index.php?action=add');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -127,4 +133,21 @@ function remove(e){
     e.stopPropagation()
 }
 
+function createEditButton(){
+    let button = document.createElement("button")
+    button.textContent="Edit";
+    button.addEventListener("click", edit, false);
+    return button;
+}
+
+function edit(e){
+
+    xhr.open('POST', 'index.php?action=edit');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send('id=' + this.parentElement.firstElementChild.dataset.id)
+    xhr.onload = () =>{
+        if(xhr.status== 200) alert(xhr.response)
+    }
+    e.stopPropagation()
+}
 

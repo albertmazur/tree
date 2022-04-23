@@ -28,11 +28,11 @@ class Database{
         if(empty($config['database']) || empty($config['host'])|| empty($config['user'])|| empty($config['password'])) throw new ConfigurationException("Storage configuration error");
     }
 
-    public function downloadTree(): array{
+    public function first(): array{
         $query = "SELECT * FROM kategorie";
 
         $result = $this->conn->query($query);
-        return $result->fetchAll(PDO::FETCH_ASSOC);
+        return $result->fetch(PDO::FETCH_ASSOC);
     }
 
     public function  getElement(int $id):array{
@@ -61,8 +61,14 @@ class Database{
     public function addElement(array $conf): int{
         if($conf['id_prev']!='null') $query = "INSERT INTO kategorie VALUES(null, {$this->conn->quote($conf['nazwa'])}, {$this->conn->quote($conf['id_rodzic'])}, {$this->conn->quote($conf['id_prev'])})";
         else $query = "INSERT INTO kategorie VALUES(null, {$this->conn->quote($conf['nazwa'])}, {$this->conn->quote($conf['id_rodzic'])}, null)";
-        $this->conn->exec($query);
+        if($conf['id_rodzic']=='0'){
+            $query = "INSERT INTO kategorie VALUES(null, {$this->conn->quote($conf['nazwa'])}, null, null)";
+            $this->conn->exec($query);
+            $result = $this->first();
+            return $result['id'];
+        }
 
+        $this->conn->exec($query);
         return $this->returnElement($conf);
     }
 
