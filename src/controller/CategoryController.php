@@ -13,11 +13,6 @@ class CategoryController
 
     private Database $database;
     private View $view;
-    private static int $id;
-
-    public static function getId(int $id){
-        self::$id=$id;
-    }
 
     public function getChildren (int $id):array {
         return $this->database->downloadChildrenTree($id);
@@ -33,20 +28,32 @@ class CategoryController
     public function run(array $pages = self::DEFAULT_ACTION):void{
         if(isset($pages['action'])){
             if($pages['action']=="ajax") $this->ajax();
+            if($pages['action']=="add") $this->add();
+            if($pages['action']=="remove") $this->remove();
         }
         else$this->view->render($pages, ["list" =>$this->ViewTree()]);
     }
 
     public function ViewTree():array {
-        if(isset(self::$id)){
-            var_dump(self::$id);
-        }
         return $this->database->downloadChildrenTree();
     }
 
     public function ajax():void{
         if(isset($_POST['id'])){
             echo json_encode($this->database->downloadChildrenTree($_POST['id']));
+        }
+    }
+
+    public function add():void{
+        if(isset($_POST['nazwa']) && isset($_POST['id_rodzic'])){
+            $id_rodzic = (int) $_POST['id_rodzic'];
+            echo $this->database->addElement(["nazwa" => $_POST['nazwa'], "id_rodzic" => $id_rodzic , "id_prev" => $_POST['id_prev']]);
+        }
+    }
+
+    public function remove(): void{
+        if(isset($_POST['id'])){
+            $this->database->removeElement($_POST['id']);
         }
     }
 }
