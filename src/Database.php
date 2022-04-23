@@ -1,7 +1,13 @@
 <?php
 
+namespace App;
+
+use App\Exception\ConfigurationException;
+use PDO;
+use PDOException;
+
 class Database{
-    private PDO $databse;
+    private PDO $conn;
 
     public function __construct(array $config){
         try{
@@ -9,7 +15,7 @@ class Database{
             $this->createConnection($config);
         }
         catch(PDOException $e){
-            throw new StorageException("Connection error");
+            throw new ConfigurationException("Connection error", 400, $e);
         }
     }
 
@@ -20,5 +26,21 @@ class Database{
 
     private function validateConfig(array $config): void{
         if(empty($config['database']) || empty($config['host'])|| empty($config['user'])|| empty($config['password'])) throw new ConfigurationException("Storage configuration error");
+    }
+
+    public function downloadTree(): array{
+        $query = "SELECT * FROM kategorie";
+
+        $result = $this->conn->query($query);
+        return $result->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function  downloadChildrenTree(int $id = null):array{
+        if($id==null) $query = "SELECT * FROM kategorie WHERE id_rodzic IS NULL";
+        else $query = "SELECT * FROM kategorie WHERE id_rodzic=$id";
+
+
+        $result = $this->conn->query($query);
+        return $result->fetchAll(PDO::FETCH_ASSOC);
     }
 }

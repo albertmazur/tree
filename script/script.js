@@ -13,13 +13,38 @@ document.getElementById("buttonAdd").addEventListener("click", function(){
     document.getElementById("formAdd").after(fill);
 }, false)
 
-const empties = document.querySelectorAll('.empty');
+const tree = document.querySelectorAll('.empty, .add');
 
-for (const empty of empties) {
-    empty.addEventListener('dragover', dragOver);
-    empty.addEventListener('dragenter', dragEnter);
-    empty.addEventListener('dragleave', dragLeave);
-    empty.addEventListener('drop', dragDrop);
+const empties = document.querySelectorAll(".empty");
+
+for (const e of empties) {
+    e.addEventListener('click', function (){
+
+        let xhr = new XMLHttpRequest();
+
+        xhr.onload =  () =>{
+            if(xhr.status === 200){
+                //let result = JSON.parse(xhr.responseText);
+
+                //alert(result);
+
+                alert(xhr.responseText);
+            }
+        }
+        const json = {"id": this.dataset.id};
+
+        xhr.open('POST', 'data.php', );
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(json))
+    });
+
+}
+
+for (const e of tree) {
+    e.addEventListener('dragover', dragOver);
+    e.addEventListener('dragenter', dragEnter);
+    e.addEventListener('dragleave', dragLeave);
+    e.addEventListener('drop', dragDrop);
 }
 
 function dragStart() {

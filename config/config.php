@@ -7,6 +7,6 @@ return [
         'host' => 'localhost',
         'database' => 'kategorie',
         'user' => 'user_kategory',
-        'password' => '@VpIggn.2kWOC*(f'
+        'password' => 'f2lj4M/g.4ul@ZbT'
     ]
 ];
