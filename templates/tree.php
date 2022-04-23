@@ -1,4 +1,4 @@
-<div class="col-8">
+
     <h1>Drzewo kategori</h1>
     <?php $tree=$params['list'][0];?>
 
@@ -7,14 +7,10 @@
        <div class="tree">
            <ul>
                <?php
-                    $a = 0;
                        echo $tree['id_rodzic'];
                        if($tree['id_rodzic']==null){
-                            echo '<li><div class="empty" data-id="'.$tree['id'].'">'.$tree['nazwa'].'</div><div class="remove">remove</div>';
-                            echo '<ul>';
-                            $a = $tree['id'];
+                            echo '<li><div data-id="'.$tree['id'].'" class="empty">'.$tree['nazwa'].'</div><div class="remove">remove</div>';
                        }
-                        echo '</ul>';
                  ?>
                <!--
                <li>
@@ -42,4 +38,3 @@
            </ul>
        </div>
     </div>
-</div>
