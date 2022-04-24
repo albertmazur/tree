@@ -26,6 +26,7 @@ class CategoryController
             if($pages['action']=="add") $this->add();
             if($pages['action']=="remove") $this->remove();
             if($pages['action']=="edit") $this->edit();
+            if($pages['action']=="up") $this->up();
         }
         else $this->view->render($pages, ["list" =>$this->ViewTree()]);
     }
@@ -73,11 +74,18 @@ class CategoryController
     }
 
     public function edit():void{
-        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev'])){
+        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev']) && isset($_POST['id_next'])){
             if(!empty($_POST['nazwa'])) $this->database->updateNazwaElement((int) $_POST['id'], $_POST['nazwa']);
             if(!empty($_POST['id_prev'])) $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
+            if(!empty($_POST['id_next'])) $this->database->updateNextElement((int) $_POST['id_next'], (int) $_POST['id']);
             if(!empty($_POST['id_rodzic'])) $this->database->updateParentElement((int) $_POST['id'], (int) $_POST['id_rodzic']);
         }
         $this->view->render(self::DEFAULT_ACTION, ["list" =>$this->ViewTree()]);
+    }
+
+    public function up():void{
+        if(isset($_POST['id']) && isset($_POST['id_prev'])){
+            $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
+        }
     }
 }

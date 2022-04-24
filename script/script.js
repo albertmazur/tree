@@ -85,6 +85,7 @@ function newlist(){
 function newElemRemove(){
     let button = document.createElement("button")
     button.classList.add("remove");
+    button.className+=" btn btn-danger m-2";
     button.innerText = "Usuń";
     button.addEventListener("click", remove, false);
     return button;
@@ -94,7 +95,7 @@ function newElemRemove(){
 function addDatabase(e){
     this.after(createEditButton());
     let remove = newElemRemove()
-    if(this.className=="addFirst") remove.className="removeFirst"
+    if(this.className=="addFirst") remove.className="removeFirst btn btn-danger m-2"
     this.after(remove)
     let div = newlist()
     this.after(div)
@@ -128,7 +129,7 @@ function remove(e){
         xhr.open('POST', 'index.php?action=remove');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send('id=' + this.previousSibling.dataset.id)
-        if(this.className=="removeFirst"){
+        if(this.classList.contains("removeFirst")){
             let li = document.createElement("li");
             li.addEventListener('click', viewList, false)
             let button = document.createElement("button");
@@ -148,12 +149,14 @@ function remove(e){
 function createEditButton(){
     let button = document.createElement("button")
     button.textContent="Edytuj";
+    button.className="btn btn-success"
     button.addEventListener("click", edit, false);
     return button;
 }
 
 let preElement;
 function edit(e){
+    document.forms[0].firstElementChild.disabled = false
 
     if(preElement!=null){
         if( document.querySelector("input[type=text]").value!=preElement.textContent ||
@@ -174,11 +177,27 @@ function edit(e){
 
 document.getElementById("up").addEventListener("click", function (){
     let li =  preElement.parentElement;
-    let parent = preElement.parentElement.parentElement.parentElement.parentElement;
+    let parent = li.parentElement.parentElement.parentElement;
     if(parent.dataset.id_rodzic != undefined){
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
+            let id_prev;
+            if(li.previousElementSibling===null) id_prev=0
+            else id_prev=li.previousElementSibling.firstElementChild.dataset.id
+
+            xhr.open('POST', 'index.php?action=up');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send('id=' + li.nextElementSibling.firstElementChild.dataset.id + "&id_prev=" + id_prev)
+
+            xhr.onload = () =>{
+                if(xhr.status== 200) alert(xhr.response)
+            }
+        }
+
         parent.insertBefore(li, parent.lastChild);
+
         document.querySelector("input[name=id_rodzic]").value = parent.dataset.id_rodzic
         document.querySelector("input[name=id_prev]").value = parent.children[parent.children.length-3].firstElementChild.dataset.id
+        document.querySelector("input[name=id_next]").value = null
     }
 
 }, false);
@@ -186,20 +205,43 @@ document.getElementById("up").addEventListener("click", function (){
 document.getElementById("down").addEventListener("click", function (){
 
     let li = preElement.parentElement;
-    let ul = preElement.parentElement.parentElement.firstElementChild.lastElementChild
+    if(li.previousElementSibling!=null){
+        let ul = li.previousElementSibling.lastElementChild
 
-    if(ul.tagName=="UL"){
-        ul.insertBefore(li, ul.lastChild)
-        document.querySelector("input[name=id_rodzic]").value = ul.dataset.id_rodzic
-        document.querySelector("input[name=id_prev]").value = ul.children[ul.children.length-3].firstElementChild.dataset.id
+        if(ul.tagName=="UL"){
+            ul.insertBefore(li, ul.lastChild)
+            document.querySelector("input[name=id_rodzic]").value = ul.dataset.id_rodzic
+            document.querySelector("input[name=id_prev]").value = ul.children[ul.children.length-3].firstElementChild.dataset.id
+            document.querySelector("input[name=id_next]").value = null
+        }
+        else ("Aby przenieść otworz gałąż elementu z przodu");
     }
 
 }, false)
 
 document.getElementById("left").addEventListener("click", function (){
+    let li =  preElement.parentElement;
+    if(li.previousElementSibling!=null){
+        if(li.previousElementSibling.firstElementChild.tagName==="DIV"){
+            li.parentElement.insertBefore(li, li.previousElementSibling)
+            if(li.previousElementSibling==undefined) document.querySelector("input[name=id_prev]").value = 0
+            else document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+
+            document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+        }
+    }
 
 }, false)
 
 document.getElementById("right").addEventListener("click", function (){
+    let li =  preElement.parentElement;
+    if(li.nextElementSibling!=null){
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
+            li.nextElementSibling.after(li)
+            document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+            document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
 
+            if(li.nextElementSibling.firstElementChild.tagName!=="DIV") document.querySelector("input[name=id_next]").value = 0
+        }
+    }
 }, false)
