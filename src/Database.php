@@ -51,9 +51,9 @@ class Database{
     }
 
     public function  downloadChildrenTree(int $id = null):array{
-        if($id==null) $query = "SELECT * FROM kategorie WHERE id_rodzic IS NULL";
-        else $query = "SELECT * FROM kategorie WHERE id_rodzic=$id";
-
+        $query = "SELECT * FROM kategorie WHERE id_rodzic";
+        if($id==null) $query .= " IS NULL";
+        else $query .= "=$id";
         $result = $this->conn->query($query);
         return $result->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -80,8 +80,18 @@ class Database{
         return $id['id'];
     }
 
-    private function updateNextElement(int $id, int $id_prev): void{
+    public function updateNextElement(int $id, int $id_prev): void{
         $query = "UPDATE kategorie SET id_prev={$id_prev} WHERE id={$id}";
+        $this->conn->exec($query);
+    }
+
+    public function updateParentElement(int $id, int $id_rodzic): void{
+        $query = "UPDATE kategorie SET id_rodzic={$id_rodzic} WHERE id={$id}";
+        $this->conn->exec($query);
+    }
+
+    public function updateNazwaElement(int $id, string $name): void{
+        $query = "UPDATE kategorie SET nazwa={$this->conn->quote($name)} WHERE id={$id}";
         $this->conn->exec($query);
     }
 
@@ -95,11 +105,6 @@ class Database{
         $this->conn->exec($query);
 
         $query = "DELETE FROM kategorie WHERE id={$this->conn->quote($id)}";
-        $this->conn->exec($query);
-    }
-
-    public function updateNazwaElement(int $id, string $name): void{
-        $query = "UPDATE kategorie SET nazwa={$this->conn->quote($name)} WHERE id={$id}";
         $this->conn->exec($query);
     }
 }

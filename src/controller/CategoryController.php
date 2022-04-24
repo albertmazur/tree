@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Database;
 use App\Exception\ConfigurationException;
 use App\View;
@@ -32,12 +31,31 @@ class CategoryController
     }
 
     public function ViewTree():array {
-        return $this->database->downloadChildrenTree();
+        return  $this->sort($this->database->downloadChildrenTree());
+    }
+
+    private function sort(array $list):array{
+        $newList = [];
+        foreach ($list as $e){
+            if($e["id_prev"]== null){
+                $newList[] = $e;
+                $li = $e;
+            }
+        }
+
+        for($i = 0; $i<count($list); $i++){
+            if($li['id']==($list[$i]['id_prev'])){
+                $newList[] = $list[$i];
+                $li = $list[$i];
+                $i=-1;
+            }
+        }
+        return $newList;
     }
 
     public function ajax():void{
         if(isset($_POST['id'])){
-            echo json_encode($this->database->downloadChildrenTree($_POST['id']));
+            echo json_encode($this->sort($this->database->downloadChildrenTree($_POST['id'])));
         }
     }
 
@@ -55,8 +73,10 @@ class CategoryController
     }
 
     public function edit():void{
-        if(isset($_POST['id']) && isset($_POST['nazwa'])){
-            $this->database->updateNazwaElement($_POST['id'], $_POST['nazwa']);
+        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev'])){
+            if(!empty($_POST['nazwa'])) $this->database->updateNazwaElement((int) $_POST['id'], $_POST['nazwa']);
+            if(!empty($_POST['id_prev'])) $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
+            if(!empty($_POST['id_rodzic'])) $this->database->updateParentElement((int) $_POST['id'], (int) $_POST['id_rodzic']);
         }
         $this->view->render(self::DEFAULT_ACTION, ["list" =>$this->ViewTree()]);
     }

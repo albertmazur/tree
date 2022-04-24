@@ -154,13 +154,52 @@ function createEditButton(){
 
 let preElement;
 function edit(e){
-    if(preElement!=null) preElement.style.borderColor = 'salmon'
+
+    if(preElement!=null){
+        if( document.querySelector("input[type=text]").value!=preElement.textContent ||
+            document.querySelector("input[name=id_rodzic]").value != preElement.parentElement.parentElement.dataset.id_rodzic ||
+            document.querySelector("input[name=id_prev]").value != preElement.parentElement.previousElementSibling.firstElementChild.dataset.id){
+            alert("Zmiany nie zostaną zapisane")
+        }
+        preElement.style.borderColor = 'salmon'
+    }
 
     let elem = this.parentElement.firstElementChild;
     elem.style.borderColor = 'red'
     document.querySelector("input[type=text]").value = elem.textContent
     document.querySelector("input[name=id]").value= elem.dataset.id
     preElement = elem
-    e.stopPropagation()
+    e.preventDefault()
 }
 
+document.getElementById("up").addEventListener("click", function (){
+    let li =  preElement.parentElement;
+    let parent = preElement.parentElement.parentElement.parentElement.parentElement;
+    if(parent.dataset.id_rodzic != undefined){
+        parent.insertBefore(li, parent.lastChild);
+        document.querySelector("input[name=id_rodzic]").value = parent.dataset.id_rodzic
+        document.querySelector("input[name=id_prev]").value = parent.children[parent.children.length-3].firstElementChild.dataset.id
+    }
+
+}, false);
+
+document.getElementById("down").addEventListener("click", function (){
+
+    let li = preElement.parentElement;
+    let ul = preElement.parentElement.parentElement.firstElementChild.lastElementChild
+
+    if(ul.tagName=="UL"){
+        ul.insertBefore(li, ul.lastChild)
+        document.querySelector("input[name=id_rodzic]").value = ul.dataset.id_rodzic
+        document.querySelector("input[name=id_prev]").value = ul.children[ul.children.length-3].firstElementChild.dataset.id
+    }
+
+}, false)
+
+document.getElementById("left").addEventListener("click", function (){
+
+}, false)
+
+document.getElementById("right").addEventListener("click", function (){
+
+}, false)
