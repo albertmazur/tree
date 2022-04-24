@@ -6,7 +6,7 @@
                <?php
                 if(count($params['list'])>0): $tree=$params['list'][0];
                     if($tree!=null){
-                        echo '<div data-id="'.$tree['id'].'" class="empty">'.$tree['nazwa'].'</div><button class="remove">remove</button> <button class="edit">Edit</button>';
+                        echo '<div data-id="'.$tree['id'].'" class="list">'.$tree['nazwa'].'</div><button class="removeFirst">Usuń</button> <button class="edit">Edytuj</button>';
                     }
                  ?>
                <?php else: ?>

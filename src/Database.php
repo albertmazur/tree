@@ -97,4 +97,9 @@ class Database{
         $query = "DELETE FROM kategorie WHERE id={$this->conn->quote($id)}";
         $this->conn->exec($query);
     }
+
+    public function updateNazwaElement(int $id, string $name): void{
+        $query = "UPDATE kategorie SET nazwa={$this->conn->quote($name)} WHERE id={$id}";
+        $this->conn->exec($query);
+    }
 }

@@ -5,7 +5,7 @@ for (let liElement of li) {
     liElement.addEventListener("click", viewList, false)
 }
 
-let removeButton = document.querySelector(".remove");
+let removeButton = document.querySelector(".removeFirst");
 if(removeButton!=null) removeButton.addEventListener("click", remove, false)
 
 let editButton = document.querySelector(".edit");
@@ -31,12 +31,12 @@ function viewList(e){
                         //Tworzenie elemntu
                         let li = document.createElement("li");
                         li.addEventListener("click", viewList, false);
-                        let empty = document.createElement("div");
-                        empty.dataset.id = e.id;
-                        empty.classList.add("empty");
-                        empty.innerText = e.nazwa;
+                        let div = document.createElement("div");
+                        div.dataset.id = e.id;
+                        div.classList.add("list");
+                        div.innerText = e.nazwa;
 
-                        li.append(empty);
+                        li.append(div);
                         li.append(newElemRemove());
                         li.append(createEditButton())
                         ul.append(li);
@@ -77,14 +77,15 @@ function createAddButton(){
 function newlist(){
     let div = document.createElement("div")
     div.textContent = prompt("Nazwa:");
-    div.classList.add("empty");
+    if(div.textContent==null) return null
+    div.classList.add("list");
     return div;
 }
 
 function newElemRemove(){
     let button = document.createElement("button")
     button.classList.add("remove");
-    button.innerText = "remove";
+    button.innerText = "Usuń";
     button.addEventListener("click", remove, false);
     return button;
 }
@@ -92,7 +93,9 @@ function newElemRemove(){
 //Dodwanie do bazdy
 function addDatabase(e){
     this.after(createEditButton());
-    this.after(newElemRemove())
+    let remove = newElemRemove()
+    if(this.className=="addFirst") remove.className="removeFirst"
+    this.after(remove)
     let div = newlist()
     this.after(div)
 
@@ -125,7 +128,16 @@ function remove(e){
         xhr.open('POST', 'index.php?action=remove');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.send('id=' + this.previousSibling.dataset.id)
-
+        if(this.className=="removeFirst"){
+            let li = document.createElement("li");
+            li.addEventListener('click', viewList, false)
+            let button = document.createElement("button");
+            button.classList.add("addFirst")
+            button.innerText="+"
+            button.addEventListener("click", addDatabase, false)
+            li.append(button);
+            document.querySelector(".tree ul").append(li)
+        }
         xhr.onload = () =>{
             if(xhr.status== 200) this.parentElement.remove();
         }
@@ -135,19 +147,20 @@ function remove(e){
 
 function createEditButton(){
     let button = document.createElement("button")
-    button.textContent="Edit";
+    button.textContent="Edytuj";
     button.addEventListener("click", edit, false);
     return button;
 }
 
+let preElement;
 function edit(e){
+    if(preElement!=null) preElement.style.borderColor = 'salmon'
 
-    xhr.open('POST', 'index.php?action=edit');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send('id=' + this.parentElement.firstElementChild.dataset.id)
-    xhr.onload = () =>{
-        if(xhr.status== 200) alert(xhr.response)
-    }
+    let elem = this.parentElement.firstElementChild;
+    elem.style.borderColor = 'red'
+    document.querySelector("input[type=text]").value = elem.textContent
+    document.querySelector("input[name=id]").value= elem.dataset.id
+    preElement = elem
     e.stopPropagation()
 }
 

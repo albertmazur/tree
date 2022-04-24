@@ -9,7 +9,7 @@ use App\View;
 
 class CategoryController
 {
-    private const DEFAULT_ACTION = ["tree"];
+    private const DEFAULT_ACTION = ["tree", "form"];
 
     private Database $database;
     private View $view;
@@ -54,12 +54,10 @@ class CategoryController
         }
     }
 
-    public function edit(): void{
-        if(isset($_POST['id'])){
-            $element = $this->database->getElement($_POST['id']);
-            $p = self::DEFAULT_ACTION;
-            array_push($p, "form");
-            $this->view->render($p, ["list" =>$this->ViewTree(), "element" => $element]);
+    public function edit():void{
+        if(isset($_POST['id']) && isset($_POST['nazwa'])){
+            $this->database->updateNazwaElement($_POST['id'], $_POST['nazwa']);
         }
+        $this->view->render(self::DEFAULT_ACTION, ["list" =>$this->ViewTree()]);
     }
 }
