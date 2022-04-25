@@ -9,7 +9,7 @@
 
 .tree-body{
     white-space: nowrap;
-    overflow: scroll;
+    overflow: auto;
     box-sizing: content-box;
 }
 
