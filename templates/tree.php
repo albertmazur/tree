@@ -1,7 +1,8 @@
 <div class="col-8">
     <h1 class="text-center">Drzewo kategori</h1>
     <div class="tree-body">
-       <div class="tree">
+        <button type="button" id="show" class="btn btn-primary">Pokaż całe strukturę</button>
+        <div class="tree">
            <ul><li>
                <?php
                 if(count($params['list'])>0): $tree=$params['list'][0];
@@ -13,6 +14,6 @@
                 <button class="addFirst btn btn-secondary">+</button>
                <?php endif; ?>
            </li></ul>
-       </div>
+        </div>
     </div>
 </div>

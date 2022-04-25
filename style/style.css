@@ -11,6 +11,12 @@
     white-space: nowrap;
     overflow: auto;
     box-sizing: content-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.tree-body #show{
+    place-self: center;
 }
 
 .tree{
