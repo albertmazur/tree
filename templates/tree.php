@@ -10,7 +10,7 @@
                     }
                  ?>
                <?php else: ?>
-                <button class="addFirst">+</button>
+                <button class="addFirst btn btn-secondary">+</button>
                <?php endif; ?>
            </li></ul>
        </div>

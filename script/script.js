@@ -68,6 +68,7 @@ function createAddButton(){
     li.addEventListener('click', viewList, false)
     let button = document.createElement("button")
     button.classList.add("add")
+    button.className += " btn btn-secondary"
     button.innerText="+"
     button.addEventListener("click", addDatabase, false)
     li.append(button)
@@ -97,7 +98,7 @@ function addDatabase(e){
     if(div!=null){
         this.after(createEditButton())
         let remove = newElemRemove()
-        if(this.className=="addFirst") remove.className="removeFirst btn btn-danger m-2"
+        if(this.classList.contains("addFirst")) remove.className="removeFirst btn btn-danger m-2"
         this.after(remove)
         this.after(div)
 
@@ -107,7 +108,7 @@ function addDatabase(e){
             id_prev = this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-2].firstElementChild.dataset.id
         }
         else id_prev = null
-        if(this.className!="addFirst"){
+        if(!this.classList.contains("addFirst")){
             let button = createAddButton()
             this.parentElement.parentElement.append(button)
         }
@@ -136,6 +137,7 @@ function remove(e){
             li.addEventListener('click', viewList, false)
             let button = document.createElement("button")
             button.classList.add("addFirst")
+            button.className+= " btn btn-secondary"
             button.innerText="+"
             button.addEventListener("click", addDatabase, false)
             li.append(button);
