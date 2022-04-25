@@ -15,6 +15,8 @@
             <input type="hidden" name="id_rodzic">
             <input type="hidden" name="id_prev">
             <input type="hidden" name="id_next">
+            <input type="hidden" name="id_n">
+            <input type="hidden" name="id_r">
             <input type="submit" class="btn btn-primary mt-4" value="Zapisz">
         </fieldset>
     </form>

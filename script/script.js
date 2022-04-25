@@ -1,6 +1,6 @@
 const xhr = new XMLHttpRequest()
 
-let li = document.querySelectorAll(".tree li")
+let li = document.querySelectorAll(".tree div")
 for (let liElement of li) {
     liElement.addEventListener("click", viewList, false)
 }
@@ -14,24 +14,25 @@ if(editButton!=null) editButton.addEventListener("click", edit, false)
 let addButton = document.querySelector(".addFirst")
 if(addButton!=null) addButton.addEventListener("click", addDatabase, false)
 
-function viewList(e){
-    if(this.lastChild.tagName!="UL" || this.lastChild==undefined){
+function viewList(){
+    if(this.parentElement.lastChild.tagName!=="UL"){
         xhr.open('POST', 'index.php?action=ajax')
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-        xhr.send('id=' + this.firstElementChild.dataset.id)
+        xhr.send('id=' + this.dataset.id)
 
         xhr.onload = () => {
-            if(xhr.status == 200){
+            if(xhr.status === 200){
+               // alert(xhr.response)
                 let reslut = JSON.parse(xhr.response)
                 if(reslut.length>0){
                     // Tworzenie listy
                     let ul = document.createElement("ul")
-                    ul.dataset.id_rodzic=this.children[0].dataset.id
+                    ul.dataset.id_rodzic=this.dataset.id
                     for(let e of reslut){
                         //Tworzenie elemntu
                         let li = document.createElement("li")
-                        li.addEventListener("click", viewList, false)
                         let div = document.createElement("div")
+                        div.addEventListener("click", viewList, false)
                         div.dataset.id = e.id
                         div.classList.add("list")
                         div.innerText = e.nazwa
@@ -41,31 +42,29 @@ function viewList(e){
                         li.append(createEditButton())
                         ul.append(li)
                     }
-                    //Możliwośc dodawania do listy
+                    //dodawania do listy
                     ul.append(createAddButton())
                     ul.dataset.have=true
-                    this.append(ul)
+                    this.parentElement.append(ul)
                 }
                 else {
                     let ul = document.createElement("ul")
-                    ul.dataset.id_rodzic=this.firstElementChild.dataset.id
+                    ul.dataset.id_rodzic=this.dataset.id
                     ul.append(createAddButton())
                     ul.dataset.have=true
-                    this.append(ul)
+                    this.parentElement.append(ul)
                 }
             }
         }
     }
     else {
-        if (this.lastChild.style.display === "none") this.lastChild.style.display = "flex"
-        else this.lastChild.style.display = "none"
+        if (this.parentElement.lastChild.style.display === "none") this.parentElement.lastChild.style.display = "flex"
+        else this.parentElement.lastChild.style.display = "none"
     }
-    e.stopPropagation();
 }
 //Tworzenie przysisku do dodawania
 function createAddButton(){
     let li = document.createElement("li")
-    li.addEventListener('click', viewList, false)
     let button = document.createElement("button")
     button.classList.add("add")
     button.className += " btn btn-secondary"
@@ -79,6 +78,7 @@ function newlist(){
     let div = document.createElement("div")
     div.textContent = prompt("Nazwa:")
     if(div.textContent==='') return null
+    div.addEventListener('click', viewList, false)
     div.classList.add("list")
     return div;
 }
@@ -134,7 +134,6 @@ function remove(e){
         xhr.send('id=' + this.previousSibling.dataset.id)
         if(this.classList.contains("removeFirst")){
             let li = document.createElement("li")
-            li.addEventListener('click', viewList, false)
             let button = document.createElement("button")
             button.classList.add("addFirst")
             button.className+= " btn btn-secondary"
@@ -162,15 +161,7 @@ let preElement;
 function edit(e){
     document.forms[0].firstElementChild.disabled = false
 
-    if(preElement!=null){
-        if( document.querySelector("input[type=text]").value!=preElement.textContent ||
-            document.querySelector("input[name=id_rodzic]").value != preElement.parentElement.parentElement.dataset.id_rodzic ||
-            document.querySelector("input[name=id_prev]").value != preElement.parentElement.previousElementSibling.firstElementChild.dataset.id){
-            alert("Zmiany nie zostaną zapisane")
-            window.location.reload(true)
-        }
-        preElement.style.borderColor = 'black'
-    }
+    if(preElement!=null) preElement.style.borderColor = 'black'
 
     let elem = this.parentElement.firstElementChild
     elem.style.borderColor = 'red'
@@ -183,71 +174,72 @@ function edit(e){
 document.getElementById("up").addEventListener("click", function (){
     let li =  preElement.parentElement
     let parent = li.parentElement.parentElement.parentElement
-    if(parent.dataset.id_rodzic != undefined){
-        if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
-            let id_prev
-            if(li.previousElementSibling===null) id_prev=0
-            else id_prev=li.previousElementSibling.firstElementChild.dataset.id
 
-            xhr.open('POST', 'index.php?action=up')
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-            xhr.send('id=' + li.nextElementSibling.firstElementChild.dataset.id + "&id_prev=" + id_prev)
-
-            xhr.onload = () =>{
-                if(xhr.status== 200) alert(xhr.response)
-            }
-        }
-
-        parent.insertBefore(li, parent.lastChild)
-
-        document.querySelector("input[name=id_rodzic]").value = parent.dataset.id_rodzic
-        document.querySelector("input[name=id_prev]").value = parent.children[parent.children.length-3].firstElementChild.dataset.id
-        document.querySelector("input[name=id_next]").value = null
+    document.querySelector("input[name=id_rodzic]").value = parent.dataset.id_rodzic
+    document.querySelector("input[name=id_prev]").value = parent.children[parent.children.length-2].firstElementChild.dataset.id
+    if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
+        document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+        if(li.previousElementSibling===null) document.querySelector("input[name=id_nowy]").value=-1
+        else document.querySelector("input[name=id_nowy]").value = li.previousElementSibling.firstElementChild.dataset.id
     }
+
+    document.forms[0].submit();
 
 }, false)
 
 document.getElementById("down").addEventListener("click", function (){
-
     let li = preElement.parentElement
-    if(li.previousElementSibling!=null){
-        let ul = li.previousElementSibling.lastElementChild
+    let ul = li.previousElementSibling.lastElementChild
 
-        if(ul.tagName==="UL"){
-            if(ul.style.display === "none") ul.style.display="flex"
-            ul.insertBefore(li, ul.lastChild)
-            document.querySelector("input[name=id_rodzic]").value = ul.dataset.id_rodzic
-            document.querySelector("input[name=id_prev]").value = ul.children[ul.children.length-3].firstElementChild.dataset.id
-            document.querySelector("input[name=id_next]").value = null
+    if(ul.tagName==="UL"){
+        document.querySelector("input[name=id_rodzic]").value = ul.dataset.id_rodzic
+        if(ul.children[ul.children.length-2]!=null) document.querySelector("input[name=id_prev]").value = ul.children[ul.children.length-2].firstElementChild.dataset.id
+        else document.querySelector("input[name=id_prev]").value = -1
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
+            document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+            if(li.previousElementSibling===null) document.querySelector("input[name=id_nowy]").value = -1
+            else document.querySelector("input[name=id_nowy]").value = li.previousElementSibling.firstElementChild.dataset.id
         }
-        else alert("Aby przenieść otworz gałąż elementu z przodu")
     }
+    else alert("Aby przenieść otworz gałąż elementu z przodu")
 
+    document.forms[0].submit();
 }, false)
 
 document.getElementById("left").addEventListener("click", function (){
     let li =  preElement.parentElement
     if(li.previousElementSibling!=null){
-        if(li.previousElementSibling.firstElementChild.tagName==="DIV"){
-            li.parentElement.insertBefore(li, li.previousElementSibling)
-            if(li.previousElementSibling==undefined) document.querySelector("input[name=id_prev]").value = 0
-            else document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
+        li.parentElement.insertBefore(li, li.previousElementSibling)
 
-            document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
-        }
+        document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+        if(li.previousElementSibling==null) document.querySelector("input[name=id_prev]").value = -1
+        else document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+
+        document.forms[0].submit()
     }
 
 }, false)
 
 document.getElementById("right").addEventListener("click", function (){
     let li =  preElement.parentElement
-    if(li.nextElementSibling!=null){
-        if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
-            li.nextElementSibling.after(li)
-            document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
-            document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
 
-            if(li.nextElementSibling.firstElementChild.tagName!=="DIV") document.querySelector("input[name=id_next]").value = 0
-        }
+    if(li.nextElementSibling.firstElementChild.tagName=="DIV"){
+        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
+        if(li.previousElementSibling==null) document.querySelector("input[name=id_r]").value = -1
+        else document.querySelector("input[name=id_r]").value = li.previousElementSibling.firstElementChild.dataset.id
+
+
+        li.nextElementSibling.after(li)
+
+        document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+
+        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+
+        if(li.previousElementSibling==null) document.querySelector("input[name=id_prev]").value = -1
+        else document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
+
+        document.forms[0].submit()
     }
+
 }, false)

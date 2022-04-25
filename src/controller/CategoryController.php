@@ -43,7 +43,6 @@ class CategoryController
                 $li = $e;
             }
         }
-
         for($i = 0; $i<count($list); $i++){
             if($li['id']==($list[$i]['id_prev'])){
                 $newList[] = $list[$i];
@@ -74,11 +73,13 @@ class CategoryController
     }
 
     public function edit():void{
-        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev']) && isset($_POST['id_next'])){
+        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev']) && isset($_POST['id_next']) && isset($_POST['id_n']) && isset($_POST['id_r'])){
             if(!empty($_POST['nazwa'])) $this->database->updateNazwaElement((int) $_POST['id'], $_POST['nazwa']);
             if(!empty($_POST['id_prev'])) $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
             if(!empty($_POST['id_next'])) $this->database->updateNextElement((int) $_POST['id_next'], (int) $_POST['id']);
             if(!empty($_POST['id_rodzic'])) $this->database->updateParentElement((int) $_POST['id'], (int) $_POST['id_rodzic']);
+            if(!empty($_POST['id_n']) && !empty($_POST['id_next']) && empty($_POST['id_r'])) $this->database->updateNextElement((int) $_POST['id_n'], (int) $_POST['id_next']);
+            if(!empty($_POST['id_n']) && !empty($_POST['id_next']) && !empty($_POST['id_r'])) $this->database->updateNextElement((int) $_POST['id_n'], (int) $_POST['id_r']);
         }
         $this->view->render(self::DEFAULT_ACTION, ["list" =>$this->ViewTree()]);
     }

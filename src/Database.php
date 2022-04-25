@@ -82,7 +82,7 @@ class Database{
 
     public function updateNextElement(int $id, int $id_prev): void{
         $query = "UPDATE kategorie SET id_prev=";
-        if($id_prev==0) $query .= "null WHERE id={$id}";
+        if($id_prev<0) $query .= "NULL WHERE id={$id}";
         else $query .= "{$id_prev} WHERE id={$id}";
         $this->conn->exec($query);
     }

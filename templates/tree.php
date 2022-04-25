@@ -1,7 +1,6 @@
 <div class="col-8">
     <h1 class="text-center">Drzewo kategori</h1>
     <div class="tree-body">
-        <button type="button" id="show" class="btn btn-primary">Pokaż całe strukturę</button>
         <div class="tree">
            <ul><li>
                <?php
