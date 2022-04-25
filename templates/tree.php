@@ -1,4 +1,4 @@
-<div class="col-8">
+<div class="col-lg-8 col-sm-12 mb-5">
     <h1 class="text-center">Drzewo kategori</h1>
     <div class="tree-body">
         <div class="tree">

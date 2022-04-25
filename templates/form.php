@@ -1,8 +1,11 @@
-<div class="col-4 ">
+<div class="col-lg col-sm-12">
     <h1 class="text-center">Edytowanie elementu</h1>
     <form method="post" action="/?action=edit" >
         <fieldset class="d-flex flex-column align-items-center" disabled>
-            <div class="input-group"><span class="input-group-text">Nazwa</span> <input type="text" class="form-control" name="nazwa"></div>
+            <div class="d-flex flex-row">
+                <span class=" input-group-text">Nazwa</span>
+                <input type="text" class="form-control" name="nazwa">
+            </div>
             <fieldset class="d-flex flex-column align-items-center">
                 <button type="button" id="up" class="btn btn-secondary btn-lg m-2">&#8593;</button>
                 <div>
