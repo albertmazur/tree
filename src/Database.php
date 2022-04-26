@@ -17,7 +17,7 @@ class Database{
             $this->createConnection($config);
         }
         catch(PDOException $e){
-            throw new ConfigurationException("Connection error", 400, $e);
+            throw new ConfigurationException("Błąd połączenia", 400, $e);
         }
     }
 
@@ -27,7 +27,7 @@ class Database{
     }
 
     private function validateConfig(array $config): void{
-        if(empty($config['database']) || empty($config['host'])|| empty($config['user'])|| empty($config['password'])) throw new ConfigurationException("Storage configuration error");
+        if(empty($config['database']) || empty($config['host'])|| empty($config['user'])|| empty($config['password'])) throw new ConfigurationException("Błąd konfiguracji magazynu");
     }
 
     public function getElement(int $id):array{

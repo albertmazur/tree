@@ -18,6 +18,6 @@ try {
     $controller->run();
 
 } catch (ConfigurationException $e) {
-    echo "<h1>Błąd configuracji</h1>";
+    echo "<h1>Błąd konfiguracji</h1>";
 }
 
