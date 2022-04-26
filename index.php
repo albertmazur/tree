@@ -18,6 +18,6 @@ try {
     $controller->run();
 
 } catch (ConfigurationException $e) {
-    echo "<h1>Błąd konfiguracji</h1>";
+    (new \App\View())->render(["error"], ["error" => "Błąd konfiguracji"]);
 }
 
