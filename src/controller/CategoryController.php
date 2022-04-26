@@ -37,8 +37,7 @@ class CategoryController
             $this->$action();
         }
         catch (StorageException $e){
-            var_dump($e->getPrevious());
-            $this->view->render(["error"], ['error' => $e->getPrevious()->getMessage()]);
+            $this->view->render(["error"], ['error' => $e->getMessage()]);
         }
         catch (NotFoundException $e){
             $this->view->render(["error"], ['error' => 'NotFound']);
