@@ -14,7 +14,7 @@
   <body>
   <div class="container">
       <div class="row">
-          <?php foreach ($pages as $page) require_once "templates/$page.php"?>
+          <?php if(isset($pages)) foreach ($pages as $page) require_once "templates/$page.php"?>
 
       </div>
   </div>

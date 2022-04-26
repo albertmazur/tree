@@ -4,35 +4,52 @@ namespace App\Controller;
 
 use App\Database;
 use App\Exception\ConfigurationException;
+use App\Exception\NotFoundException;
+use App\Exception\StorageException;
+use App\Request;
 use App\View;
 
 class CategoryController
 {
-    private const DEFAULT_ACTION = ["tree", "form"];
+    private const DEFAULT_PAGES = ["tree", "form"];
+    private const DEFAULT_ACTION = "view";
 
     private Database $database;
     private View $view;
+    private Request $request;
 
-    public function __construct(array $configuration ){
+    public function __construct(array $configuration, Request $request){
         if(empty($configuration['db'])) throw new ConfigurationException("Configuration error");
 
         $this->database = new Database($configuration['db']);
         $this->view = new View();
+        $this->request = $request;
     }
 
-    public function run(array $pages = self::DEFAULT_ACTION):void{
-        if(isset($pages['action'])){
-            if($pages['action']=="ajax") $this->ajax();
-            if($pages['action']=="add") $this->add();
-            if($pages['action']=="remove") $this->remove();
-            if($pages['action']=="edit") $this->edit();
-            if($pages['action']=="up") $this->up();
+    private function action() :string{
+        return $this->request->getParam("action", self::DEFAULT_ACTION);
+    }
+
+    public function run():void{
+        try{
+            $action = $this->action()."Action";
+            if(!method_exists($this, $action)) $action = self::DEFAULT_ACTION ."ACTION";
+            $this->$action();
         }
-        else $this->view->render($pages, ["list" =>$this->ViewTree()]);
+        catch (StorageException $e){
+            $this->view->render(["error"], ['error' => $e->getPrevious()->getMessage()]);
+        }
+        catch (NotFoundException $e){
+            $this->view->render(["error"], ['error' => 'NotFound']);
+        }
     }
 
     public function ViewTree():array {
         return  $this->sort($this->database->downloadChildrenTree());
+    }
+
+    public function viewAction($pages = self::DEFAULT_PAGES): void{
+        $this->view->render($pages, ["list" =>$this->ViewTree()]);
     }
 
     private function sort(array $list):array{
@@ -53,40 +70,45 @@ class CategoryController
         return $newList;
     }
 
-    public function ajax():void{
-        if(isset($_POST['id'])){
-            echo json_encode($this->sort($this->database->downloadChildrenTree($_POST['id'])));
+    public function ajaxAction():void{
+        if($this->request->postParam("id") !== null){
+            echo json_encode($this->sort($this->database->downloadChildrenTree((int) $this->request->postParam("id"))));
         }
     }
 
-    public function add():void{
-        if(isset($_POST['nazwa']) && isset($_POST['id_rodzic'])){
-            $id_rodzic = (int) $_POST['id_rodzic'];
-            echo $this->database->addElement(["nazwa" => $_POST['nazwa'], "id_rodzic" => $id_rodzic , "id_prev" => $_POST['id_prev']]);
+
+    public function addAction():void{
+        if($this->request->postParam('nazwa') !== null){
+            $id_rodzic = $this->request->postParam("id_rodzic")==0 ? null : $this->request->postParam("id_rodzic");
+            $id_prev = $this->request->postParam("id_prev")==0 ? null : $this->request->postParam("id_prev");
+            echo $this->database->addElement(["nazwa" => $this->request->postParam('nazwa'), "id_rodzic" => $id_rodzic , "id_prev" => $id_prev]);
         }
     }
 
-    public function remove(): void{
-        if(isset($_POST['id'])){
-            $this->database->removeElement($_POST['id']);
+    public function removeAction(): void{
+        if($this->request->postParam("id") !== null){
+            $this->database->removeElement($this->request->postParam("id"));
         }
     }
 
-    public function edit():void{
-        if(!empty($_POST['id']) && isset($_POST['nazwa']) && isset($_POST['id_rodzic']) && isset($_POST['id_prev']) && isset($_POST['id_next']) && isset($_POST['id_n']) && isset($_POST['id_r'])){
-            if(!empty($_POST['nazwa'])) $this->database->updateNazwaElement((int) $_POST['id'], $_POST['nazwa']);
-            if(!empty($_POST['id_prev'])) $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
-            if(!empty($_POST['id_next'])) $this->database->updateNextElement((int) $_POST['id_next'], (int) $_POST['id']);
-            if(!empty($_POST['id_rodzic'])) $this->database->updateParentElement((int) $_POST['id'], (int) $_POST['id_rodzic']);
-            if(!empty($_POST['id_n']) && !empty($_POST['id_next']) && empty($_POST['id_r'])) $this->database->updateNextElement((int) $_POST['id_n'], (int) $_POST['id_next']);
-            if(!empty($_POST['id_n']) && !empty($_POST['id_next']) && !empty($_POST['id_r'])) $this->database->updateNextElement((int) $_POST['id_n'], (int) $_POST['id_r']);
-        }
-        $this->view->render(self::DEFAULT_ACTION, ["list" =>$this->ViewTree()]);
-    }
+    public function editAction():void{
+        if(!empty($this->request->postParam('id'))){
+            $id = (int) $this->request->postParam('id');
+            $nazwa = $this->request->postParam('nazwa');
+            $id_rodzic = (int) $this->request->postParam('id_rodzic');
+            $id_prev = (int) $this->request->postParam('id_prev');
+            $id_next = (int) $this->request->postParam('id_next');
+            $id_n = (int) $this->request->postParam('id_n');
+            $id_r = (int) $this->request->postParam('id_r');
 
-    public function up():void{
-        if(isset($_POST['id']) && isset($_POST['id_prev'])){
-            $this->database->updateNextElement((int) $_POST['id'], (int) $_POST['id_prev']);
+            if(!empty($nazwa)) $this->database->updateNazwaElement($id, $nazwa);
+            if(!empty($id_prev)) $this->database->updateNextElement($id, $id_prev);
+            if(!empty($id_next)) $this->database->updateNextElement($id_next, $id);
+            if(!empty($id_rodzic)) $this->database->updateParentElement($id, $id_rodzic);
+            if(!empty($id_rodzic) && !empty($id_next)) $this->database->updateNextElement($id_next, $id_rodzic);
+            if(!empty($id_n) && !empty($id_next) && empty($id_r)) $this->database->updateNextElement($id_n, $id_next);
+            if(!empty($id_n) && !empty($id_next) && !empty($id_r)) $this->database->updateNextElement($id_n, $id_r);
         }
+        $this->view->render(self::DEFAULT_PAGES, ["list" =>$this->ViewTree()]);
     }
 }

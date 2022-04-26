@@ -14,13 +14,9 @@ use App\Exception\ConfigurationException;
 $conf = require_once ("config/config.php");
 
 try {
-    $controller = new CategoryController($conf );
-    if(isset($_GET['action'])){
-        $controller->run( ['action' => $_GET['action']]);
-    }
-    else{
-        $controller->run();
-    }
+    $controller = new CategoryController($conf, new \App\Request($_GET, $_POST));
+    $controller->run();
+
 } catch (ConfigurationException $e) {
     echo "<h1>Błąd configuracji</h1>";
 }

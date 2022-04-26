@@ -20,9 +20,8 @@ function viewList(){
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
         xhr.send('id=' + this.dataset.id)
 
-        xhr.onload = () => {
+        xhr.onload  = () => {
             if(xhr.status === 200){
-               // alert(xhr.response)
                 let reslut = JSON.parse(xhr.response)
                 if(reslut.length>0){
                     // Tworzenie listy
@@ -66,8 +65,7 @@ function viewList(){
 function createAddButton(){
     let li = document.createElement("li")
     let button = document.createElement("button")
-    button.classList.add("add")
-    button.className += " btn btn-secondary"
+    button.className += "add btn btn-secondary"
     button.innerText="+"
     button.addEventListener("click", addDatabase, false)
     li.append(button)
@@ -85,8 +83,7 @@ function newlist(){
 
 function newElemRemove(){
     let button = document.createElement("button")
-    button.classList.add("remove")
-    button.className+=" btn btn-danger m-2"
+    button.className+="remove btn btn-danger m-2"
     button.innerText = "Usuń"
     button.addEventListener("click", remove, false)
     return button;
@@ -102,12 +99,21 @@ function addDatabase(e){
         this.after(remove)
         this.after(div)
 
-        let id = this.parentElement.parentElement.dataset.id_rodzic
+        let id
         let id_prev
-        if(this.parentElement.parentElement.children.length-2>=0){
-            id_prev = this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-2].firstElementChild.dataset.id
+        if(!this.classList.contains("addFirst")){
+
+            id = this.parentElement.parentElement.dataset.id_rodzic
+            if(this.parentElement.parentElement.children.length-2>=0){
+                id_prev = this.parentElement.parentElement.children[this.parentElement.parentElement.children.length-2].firstElementChild.dataset.id
+            }
+            else id_prev = null
         }
-        else id_prev = null
+        else {
+            id= null
+            id_prev = null
+        }
+
         if(!this.classList.contains("addFirst")){
             let button = createAddButton()
             this.parentElement.parentElement.append(button)
@@ -119,7 +125,7 @@ function addDatabase(e){
         xhr.send('nazwa=' + div.textContent + "&id_rodzic=" +id+ "&id_prev=" +id_prev)
 
         xhr.onload = () => {
-          if(xhr.status==200){
+          if(xhr.status===200 && xhr.readyState === 4){
               div.dataset.id=xhr.response
           }
         }
@@ -142,8 +148,8 @@ function remove(e){
             li.append(button);
             document.querySelector(".tree ul").append(li)
         }
-        xhr.onload = () =>{
-            if(xhr.status== 200) this.parentElement.remove()
+        xhr.onload  = () =>{
+            if(xhr.status=== 200) this.parentElement.remove()
         }
     }
     e.stopPropagation()
@@ -179,8 +185,6 @@ document.getElementById("up").addEventListener("click", function (){
     document.querySelector("input[name=id_prev]").value = parent.children[parent.children.length-2].firstElementChild.dataset.id
     if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
         document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
-        if(li.previousElementSibling===null) document.querySelector("input[name=id_nowy]").value=-1
-        else document.querySelector("input[name=id_nowy]").value = li.previousElementSibling.firstElementChild.dataset.id
     }
 
     document.forms[0].submit();
@@ -197,19 +201,16 @@ document.getElementById("down").addEventListener("click", function (){
         else document.querySelector("input[name=id_prev]").value = -1
         if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
             document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
-            if(li.previousElementSibling===null) document.querySelector("input[name=id_nowy]").value = -1
-            else document.querySelector("input[name=id_nowy]").value = li.previousElementSibling.firstElementChild.dataset.id
         }
+        document.forms[0].submit();
     }
     else alert("Aby przenieść otworz gałąż elementu z przodu")
-
-    document.forms[0].submit();
 }, false)
 
 document.getElementById("left").addEventListener("click", function (){
     let li =  preElement.parentElement
     if(li.previousElementSibling!=null){
-        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
         li.parentElement.insertBefore(li, li.previousElementSibling)
 
         document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
@@ -224,8 +225,8 @@ document.getElementById("left").addEventListener("click", function (){
 document.getElementById("right").addEventListener("click", function (){
     let li =  preElement.parentElement
 
-    if(li.nextElementSibling.firstElementChild.tagName=="DIV"){
-        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
+    if(li.nextElementSibling.firstElementChild.tagName==="DIV"){
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV") document.querySelector("input[name=id_n]").value = li.nextElementSibling.firstElementChild.dataset.id
         if(li.previousElementSibling==null) document.querySelector("input[name=id_r]").value = -1
         else document.querySelector("input[name=id_r]").value = li.previousElementSibling.firstElementChild.dataset.id
 
@@ -234,7 +235,7 @@ document.getElementById("right").addEventListener("click", function (){
 
         document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
 
-        if(li.nextElementSibling.firstElementChild.tagName=="DIV") document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
+        if(li.nextElementSibling.firstElementChild.tagName==="DIV") document.querySelector("input[name=id_next]").value = li.nextElementSibling.firstElementChild.dataset.id
 
         if(li.previousElementSibling==null) document.querySelector("input[name=id_prev]").value = -1
         else document.querySelector("input[name=id_prev]").value = li.previousElementSibling.firstElementChild.dataset.id
