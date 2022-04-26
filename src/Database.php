@@ -30,7 +30,7 @@ class Database{
         if(empty($config['database']) || empty($config['host'])|| empty($config['user'])|| empty($config['password'])) throw new ConfigurationException("Storage configuration error");
     }
 
-    public function  getElement(int $id):array{
+    public function getElement(int $id):array{
         try{
             $query = "SELECT * FROM kategorie WHERE id={$id}";
 
@@ -42,7 +42,7 @@ class Database{
         }
     }
 
-    public function  getNextElement(int $id):array{
+    public function getNextElement(int $id):array{
         try{
             $query = "SELECT * FROM kategorie WHERE id_prev={$id}";
             $result = $this->conn->query($query);
@@ -100,7 +100,7 @@ class Database{
     public function updateNextElement(int $id, int $id_prev): void{
         try{
             $query = "UPDATE kategorie SET id_prev=";
-            if($id_prev<0) $query .= "NULL WHERE id={$id}";
+            if($id_prev<=0) $query .= "NULL WHERE id={$id}";
             else $query .= "{$id_prev} WHERE id={$id}";
             $this->conn->exec($query);
         }
@@ -129,22 +129,15 @@ class Database{
         }
     }
 
-    public function remove(int $id){
-        $query = "DELETE FROM kategorie WHERE id={$this->conn->quote($id)}";
-        $this->conn->exec($query);
-    }
-
-
     public function removeElement(int $id): void{
         try{
 
             $element = $this->getElement($id);
             $elementNext = $this->getNextElement($id);
 
-            if(count($elementNext)>0) $this->updateNextElement((int)$elementNext['id'], (int)$element['id_prev']);
+            if(!empty($elementNext)) $this->updateNextElement((int)$elementNext['id'], (int)$element['id_prev']);
 
             $this->removeChildren($id);
-
             $query = "DELETE FROM kategorie WHERE id={$this->conn->quote($id)}";
             $this->conn->exec($query);
         }
@@ -155,13 +148,12 @@ class Database{
 
     public function removeChildren(int $id): void
     {
-        try {
-            $query = "DELETE FROM kategorie WHERE id_rodzic={$this->conn->quote($id)}";
-            $this->conn->exec($query);
-        }
-        catch (Throwable $e){
-            throw new StorageException("Nie udało się usunąć kategorii", 400, $e);
+        $list =  $this->downloadChildrenTree($id);
+
+        if(count($list)>0){
+            foreach($list as $e){
+                $this->removeElement((int) $e['id']);
+            }
         }
     }
-
 }
